@@ -1,0 +1,36 @@
+[package]
+name = "filmcraft-android"
+description = "FilmCraft on Android: a GameActivity shell around the egui app (built with cargo-ndk, packaged by android/)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+# Not `workspace = true`: this shell needs a few `unsafe` lines to talk JNI to its own Kotlin
+# activity (opening through the Storage Access Framework, publishing files to Downloads), each
+# with a SAFETY comment. Everything else keeps the workspace standard.
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+
+[lib]
+name = "filmcraft_android"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[target.'cfg(target_os = "android")'.dependencies]
+filmcraft-engine = { workspace = true }
+filmcraft-ui-egui = { workspace = true }
+filmcraft-media = { workspace = true }
+egui = { workspace = true }
+# `accesskit` (which filmcraft-ui-egui enables) only builds on Android with GameActivity.
+eframe = { workspace = true, features = ["default_fonts", "wgpu", "accesskit", "android-game-activity", "persistence"] }
+# The same android-activity winit uses (Cargo.lock: 0.6.x), so `AndroidApp` is one type.
+android-activity = { version = "0.6", features = ["game-activity"] }
+android_logger = "0.15"
+jni = "0.22"
+serde_json = { workspace = true }
+log = { workspace = true }
